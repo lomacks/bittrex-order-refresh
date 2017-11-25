@@ -1,6 +1,6 @@
 # bittrex-order-refresh
 
-What?
+What is this?
 ---
 A tool to periodically "refresh" (cancel and recreate) Bittrex limit orders to work around Bittrex's new policy of
 automatically cancelling orders older than 28 days. Each time the program is run it will refresh orders older than a
@@ -11,27 +11,30 @@ to date.
 changing anything as an extra safeguard. However, it is a good idea to keep an eye on the output to ensure everything
 worked as expected. I also can't be responsible for any unforeseen problems, so use this tool at your own risk.
 
-Installation of this tool is a bit technical at the moment, but I will be adding some scripts / packaging to simplify
-this next.
+The tool is open source and written in Node.js (JavaScript) so you can vet the source code. You just need to install the
+Node.js runtime in order to use it - instructions below.
+
 
 Installation
 ---
 
-### Prerequisites
-* Node.js
-* NPM
+### Windows
+* Download and install the Node.js Windows Installer package from https://nodejs.org/en/download/. The default settings
+are fine.
+* Download bittrex-order-refresh (this tool) from https://github.com/lomacks/bittrex-order-refresh/archive/master.zip and extract it
+somewhere.
+* Double-click the `setup_windows` script to install dependencies.
+* Generate a new API key on Bittrex and give it "read info" and "trade limit" permissions.
+* Open `config.json` in *Wordpad* (Notepad can't handle these files properly) and fill in your new API key and secret key in the `credentials` section. Save and exit.
+* Double-click the `run_windows` script to run it.
 
-### Configuration
-* Run `npm install` to download library dependencies.
-* Create a new API key on Bittrex and give it "read info" and "trade limit" permissions ONLY.
-* Add the API key and secret to `config.json`.
+### Mac OSX
+*...coming soon...*
 
-Usage
+What does it do?
 ---
 
 ### Refresh orders
-
-Run `npm start`.
 
 The tool will identify any orders created more than 14 days ago (by default), and then cancel and recreate them. Only
 limit buy and limit sell orders are supported (market orders are left alone). Partially-filled orders should be handled

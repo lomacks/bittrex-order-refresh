@@ -42,6 +42,9 @@ correctly, and error-handling in the tool *should* be fairly robust - but keep a
 The tool also has the ability to restore orders from one of the auto-generated backups, but this shouldn't be needed
 under normal circumstances. If you do want to do this, usage is along the lines of:
 ```
-npm start -- --purge-open-orders  # WARNING: This will cancel ALL currently open limit orders (to avoid duplicates)
-npm start -- --restore-orders backups/backup-<date>.json  # This recreates all limit orders listed in the backup file
+npm start -- --purge-open-orders  # WARNING: This will cancel ALL currently open limit orders (to avoid duplicates when restoring)
+npm start -- --restore-orders backups/backup-<date>.json  # This recreates all limit orders from the backup file
 ```
+
+There is also a shell script, `util/csv-to-json.sh`, which may be useful for importing order lists from CSV files (e.g.
+if you kept a manual backup of your open orders before Bittrex cancelled them).

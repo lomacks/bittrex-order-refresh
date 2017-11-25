@@ -11,6 +11,9 @@
 
   // *** Additional settings; you shouldn't need to modify these ***
 
+  // backupFile: Each run, all limit orders are backed up to this file; '%s' placeholder is replaced by current timestamp
+  "backupFile": "backups/backup-%s.json",
+
   /* maxOrderAgeDays: Orders older than this many days will be replaced; this should be somewhat lower than Bittrex's
    * maximum order age of 28 days, depending how often you run this script. */
   "maxOrderAgeDays": 14,

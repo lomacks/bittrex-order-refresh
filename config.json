@@ -25,5 +25,5 @@
   "replaceAllOrders": false,
 
   // concurrentTasks: How many API-related "tasks" to run concurrently
-  "concurrentTasks": 8
+  "concurrentTasks": 4
 }

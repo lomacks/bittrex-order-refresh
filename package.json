@@ -7,7 +7,6 @@
   "scripts": {
     "start": "node app.js"
   },
-  // NOTE: Pin specific dependency versions as this is a mission-critical application
   "dependencies": {
     "lodash": "4.17.4",
     "node-bittrex-api": "0.7.8",

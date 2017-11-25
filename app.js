@@ -3,7 +3,8 @@
 
 var config = require('./lib/config'),
     logger = require('./lib/logger'),
-    bittrex = require('node-bittrex-api'),
+    //bittrex = require('node-bittrex-api'),    // See comment at the top of lib/node_bittrex_api-0.7.8-PATCHED.js
+    bittrex = require('./lib/node_bittrex_api-0.7.8-PATCHED'),
     _ = require('lodash'),
     program = require('commander'),
     util = require('util'),

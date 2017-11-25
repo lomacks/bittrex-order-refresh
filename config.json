@@ -1,0 +1,23 @@
+{
+  // *** Bittrex API credentials ***
+
+  "credentials": {
+    /* Create a new API key in Bittrex and give it "read info" and "trade limit" permissions ONLY.
+     * Then configure the API key and secret here: */
+    "key": "",
+    "secret": ""
+  },
+
+
+  // *** Additional settings; you shouldn't need to modify these ***
+
+  /* maxOrderAgeDays: Orders older than this many days will be replaced; this should be somewhat lower than Bittrex's
+   * maximum order age of 28 days, depending how often you run this script. */
+  "maxOrderAgeDays": 14,
+
+  // retryPeriodMs: Time between retries for failed API calls (milliseconds)
+  "retryPeriodMs": 500,
+
+  // replaceAllOrders: Set to true to replace all orders regardless of age (e.g. for testing)
+  "replaceAllOrders": false
+}

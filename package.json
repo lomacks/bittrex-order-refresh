@@ -1,0 +1,17 @@
+{
+  "name": "bittrex-order-ingest",
+  "version": "0.1.0",
+  "author": "Tom Lomax",
+  "private": "true",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js"
+  },
+  // NOTE: Pin specific dependency versions as this is a mission-critical application
+  "dependencies": {
+    "lodash": "4.17.4",
+    "node-bittrex-api": "0.7.8",
+    "strip-json-comments": "2.0.1",
+    "winston": "2.4.0"
+  }
+}

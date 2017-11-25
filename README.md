@@ -4,7 +4,7 @@ What is this?
 ---
 A tool to periodically "refresh" (cancel and recreate) Bittrex limit orders to work around Bittrex's new policy of
 automatically cancelling orders older than 28 days. Each time the program is run it will refresh orders older than a
-threshold (14 days by default). It should be run periodically (e.g. every day, or every few days) to keep all orders up
+threshold (14 days by default). It should be run periodically (e.g. every few days) to keep all orders up
 to date.
 
 *Important:* The tool attempts to identify and handle any potential errors, and also backs up the list of orders before

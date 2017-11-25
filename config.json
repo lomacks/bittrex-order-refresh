@@ -2,7 +2,7 @@
   // *** Bittrex API credentials ***
 
   "credentials": {
-    /* Create a new API key in Bittrex and give it "read info" and "trade limit" permissions ONLY.
+    /* Create a new API key on Bittrex and give it "read info" and "trade limit" permissions ONLY.
      * Then configure the API key and secret here: */
     "key": "",
     "secret": ""

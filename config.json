@@ -22,5 +22,8 @@
   "retryPeriodMs": 500,
 
   // replaceAllOrders: Set to true to replace all orders regardless of age (e.g. for testing)
-  "replaceAllOrders": false
+  "replaceAllOrders": false,
+
+  // concurrentTasks: How many API-related "tasks" to run concurrently
+  "concurrentTasks": 8
 }

@@ -8,7 +8,8 @@ var config = require('./lib/config'),
     program = require('commander'),
     util = require('util'),
     moment = require('moment'),
-    jsonfile = require('jsonfile')
+    jsonfile = require('jsonfile'),
+    async = require('async')
 
 // Command line args for special recovery mode functions; not needed in normal operation
 program
@@ -30,7 +31,8 @@ var doCancelOrder = function(uuid, cb) {
     bittrex.cancel({uuid: uuid}, function(err, data) {
         if (err || !data.success) {
             logger.warn('Failed to cancel order %s: %s; %j; skipping...', uuid, data ? data.message : '', err)
-            return  // continue with next
+            cb(false)  // continue with next
+            return
         }
 
         /* Wait a short period before replacing the order to give it time to cancel, then verify that it has
@@ -50,7 +52,7 @@ var doCancelOrder = function(uuid, cb) {
                 return
             }
 
-            cb()
+            cb(true)
         }
         setTimeout(getOrder, config.retryPeriodMs)
     })
@@ -95,17 +97,18 @@ bittrex.getopenorders({}, function(err, data) {
     // *** Recovery functions - not part of normal operation; see the README
     if (program.purgeOpenOrders) {
         logger.warn('Cancelling %d open limit orders...', limitOrders.length)
-        _.forEach(limitOrders, o => {
+        async.mapLimit(limitOrders, config.concurrentTasks, function (o, cb) {
             var uuid = o.OrderUuid
             doCancelOrder(uuid, function() {
                 logger.debug('Order %s cancelled.', uuid)
+                cb()
             })
         })
         return  // exit
     } else if (program.restoreOrders) {
         var restoreOrders = jsonfile.readFileSync(program.restoreOrders)
         logger.warn('Restoring %d limit orders from backup...', restoreOrders.length)
-        _.forEach(restoreOrders, o => {
+        async.mapLimit(restoreOrders, config.concurrentTasks, function (o, cb) {
             var newOrderType = o.OrderType
             var newOrder = {
                 market: o.Exchange,
@@ -116,6 +119,7 @@ bittrex.getopenorders({}, function(err, data) {
             logger.debug('Creating %s order: %j', newOrderType, newOrder)
             doCreateOrder(newOrderType, newOrder, function(newUuid) {
                 logger.debug('Order %s created.', newUuid)
+                cb()
             })
         })
         return  // exit
@@ -141,13 +145,17 @@ bittrex.getopenorders({}, function(err, data) {
             var deltaDays = (((deltaMs / 1000) / 60) / 60 ) / 24
             return deltaDays > config.maxOrderAgeDays
         })
-        logger.info('%d limit orders are older than %d days and will be replaced...',
+        logger.info('%d limit orders older than %d days will be replaced...',
             staleOrders.length, config.maxOrderAgeDays)
     }
 
     var staleOrderCount = staleOrders.length
+    if (staleOrderCount <= 0) {
+        logger.info('Nothing to do.')
+        return
+    }
 
-    _.forEach(staleOrders, o => {
+    async.mapLimit(staleOrders, config.concurrentTasks, function (o, cb) {
         var uuid = o.OrderUuid
         var newOrderType = o.OrderType
         var newOrder = {
@@ -157,13 +165,15 @@ bittrex.getopenorders({}, function(err, data) {
         }
 
         logger.debug('Replacing order %s with new %s order: %j', uuid, newOrderType, newOrder)
-        doCancelOrder(uuid, function() {
-            // Order has been cancelled; create the replacement order
-            doCreateOrder(newOrderType, newOrder, function(newUuid) {
-                logger.debug('Order %s replaced by new order %s.', uuid, newUuid)
-            })
+        doCancelOrder(uuid, function(ok) {
+            if (ok) {
+                // Order has been cancelled; create the replacement order
+                doCreateOrder(newOrderType, newOrder, function(newUuid) {
+                    logger.debug('Order %s replaced by new order %s.', uuid, newUuid)
+                    cb()
+                })
+            } // else, skip it this run
         })
-
     })
 
 })

@@ -29,7 +29,7 @@ bittrex.options({
 var doCancelOrder = function(uuid, cb) {
     bittrex.cancel({uuid: uuid}, function(err, data) {
         if (err || !data.success) {
-            logger.error('Failed to cancel order %s: %s; %j', uuid, data.message, err)
+            logger.warn('Failed to cancel order %s: %s; %j; skipping...', uuid, data ? data.message : '', err)
             return  // continue with next
         }
 
@@ -40,7 +40,7 @@ var doCancelOrder = function(uuid, cb) {
         }
         var getOrderCb = function(err, data) {
             if (err || !data.success || !data.result) {
-                logger.warn('Checking order %s failed: %s; %j; will retry...', uuid, data.message, err)
+                logger.warn('Checking order %s failed: %s; %j; will retry...', uuid, data ? data.message : '', err)
                 setTimeout(getOrder, config.retryPeriodMs)
                 return
             }
@@ -68,7 +68,7 @@ var doCreateOrder = function(newOrderType, newOrder, cb) {
     }
     var createOrderCb = function(err, data) {
         if (err || !data.success) {
-            logger.warn('Failed to create replacement %s order, %j: %s; %j; will retry...', newOrderType, newOrder, data.message, err)
+            logger.warn('Failed to create replacement %s order, %j: %s; %j; will retry...', newOrderType, newOrder, data ? data.message : '', err)
             setTimeout(createOrder, config.retryPeriodMs)
             return
         }

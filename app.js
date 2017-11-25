@@ -82,7 +82,7 @@ var doCreateOrder = function(newOrderType, newOrder, cb) {
 
 bittrex.getopenorders({}, function(err, data) {
     if (err || !data.success) {
-        logger.error('Failed to get open orders: %s; %j', data.message, err)
+        logger.error('Failed to get open orders: %s; %j', data ? data.message : '', err)
         return  // fatal
     }
 

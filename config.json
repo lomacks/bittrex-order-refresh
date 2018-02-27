@@ -25,7 +25,7 @@
   "replaceAllOrders": false,
 
   // concurrentTasks: How many API-related "tasks" to run concurrently
-  "concurrentTasks": 4
+  "concurrentTasks": 4,
 
 
   //** End additional settings, that you shouldn't need to modify ***
@@ -44,5 +44,4 @@
 
   //The sell price from initial investment. ex: cycleMultiplier: 2, rake: 0.5 sell half at double
   "cycleMultiplier": 2
-}
 }

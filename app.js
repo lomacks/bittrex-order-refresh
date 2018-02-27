@@ -12,20 +12,89 @@ var config = require('./lib/config'),
     jsonfile = require('jsonfile'),
     async = require('async')
 
-// Command line args for special recovery mode functions; not needed in normal operation
-program
-    .option('--purge-open-orders', 'Cancel ALL open limit orders, and exit (CAUTION)')
-    .option('--restore-orders <file>', 'Restore limit orders from the specified backup file, and exit')
-    .parse(process.argv)
+    // Command line args for special recovery mode functions; not needed in normal operation
+    program
+        .option('--purge-open-orders', 'Cancel ALL open limit orders, and exit (CAUTION)')
+        .option('--restore-orders <file>', 'Restore limit orders from the specified backup file, and exit')
+        .option('--sell-order')
+        .option('-c, --coin [value]', 'An optional value')
+        .option('-f, --float <v>', parseFloat)
+        .parse(process.argv)
 
-bittrex.options({
-    'apikey': config.credentials.key,
-    'apisecret': config.credentials.secret,
-    'stream': false,
-    'verbose': false,
-    'cleartext': false,
-    'inverse_callback_arguments': true
-})
+
+    bittrex.options({
+        'apikey': config.credentials.key,
+        'apisecret': config.credentials.secret,
+        'stream': false,
+        'verbose': false,
+        'cleartext': false,
+        'inverse_callback_arguments': true
+    });
+
+
+    if(program.sellOrder){
+      logger.info("--show-coin-orders used");
+      if(program.float)
+        logger.info(' program.float: %j', Math.round(program.float,-4))
+      if(program.coin)
+        logger.info(' program.coin: %j', program.coin);
+
+      getBalance(function(d) {
+        logger.info("In callback function");
+        console.log(d);
+
+        var tempQty    = d.Available;
+        var tempSell   = program.float;
+        var pair       = 'BTC-'+ program.coin
+        var i          = 1;
+        logger.info("program.float: %j", program.float);
+
+        for(var i = 1; i <= config.numberOfCycles; i++){
+
+            tempQty  = tempQty  * config.rake;
+            tempSell = tempSell * config.cycleMultiplier;
+
+            logger.info("Sell %f %j for %f each", roundDown(tempQty, 7) ,program.coin,tempSell);
+            limitSellOrder(pair, roundDown(tempQty,7) ,tempSell, function(d){
+                console.log(d);
+          });
+        }//end for loop
+      });
+      //process.exit();
+    }
+
+    function getBalance(callback){
+      bittrex.getbalance({ currency : program.coin },function(err, data){
+        if (err) {
+          return console.error(err);
+        }
+        callback(data.result);
+      });
+    }
+
+    function limitSellOrder(mPair,qty, rate, callback){
+      bittrex.tradesell({
+        MarketName: mPair,
+        OrderType: 'LIMIT',
+        Quantity: qty,
+        Rate: rate,
+        TimeInEffect: 'GOOD_TIL_CANCELLED', // supported options are 'IMMEDIATE_OR_CANCEL', 'GOOD_TIL_CANCELLED', 'FILL_OR_KILL'
+        ConditionType: 'NONE', // supported options are 'NONE', 'GREATER_THAN', 'LESS_THAN'
+        Target: 0, // used in conjunction with ConditionType
+      }, function( err, data ) {
+        if(err){
+            return console.log("duhh!, limit order not placed");
+    //      return logger.info(err);
+         }
+        callback( data );
+      });
+    }
+
+
+    function roundDown(number, decimals) {
+        decimals = decimals || 0;
+        return ( Math.floor( number * Math.pow(10, decimals) ) / Math.pow(10, decimals) );
+    }
 
 // Cancel an order, and wait for it to finish cancelling
 var doCancelOrder = function(uuid, cb) {

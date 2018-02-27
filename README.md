@@ -58,3 +58,22 @@ npm start -- --restore-orders backups/backup-<date>.json  # This recreates all l
 
 There is also a shell script, `util/csv-to-json.sh`, which may be useful for importing order lists from CSV files (e.g.
 if you kept a manual backup of your open orders before Bittrex cancelled them).
+
+### Sell Orders
+
+The tool also has the ability to create new sell orders following a generic plan
+```
+node app.js --sell-order -c COIN_NAME -f INITIAL_BUY_IN_BTC
+```
+
+Example: Given Initial buy of 500 NCM at price of 0.001, rake = 0.5, cycleMultiplier: 2, numberOfCycles:4
+
+the command node app.js --sell-order -c NCM -f 0.001 will produce the following sells:
+
+SELL 250 NCM @ 0.002
+
+SELL 125 NCM @ 0.004
+
+SELL 62.5 NCM @ 0.008
+
+SELL 31.25 NCM @ 0.016

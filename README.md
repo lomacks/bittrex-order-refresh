@@ -71,6 +71,9 @@ Example: Given Initial buy of 500 NCM at price of 0.001, rake = 0.5, cycleMultip
 the command node app.js --sell-order -c NCM -f 0.001 will produce the following sells:
 
 SELL 250 NCM @ 0.002
+
 SELL 125 NCM @ 0.004
+
 SELL 62.5 NCM @ 0.008
+
 SELL 31.25 NCM @ 0.016

@@ -16,6 +16,9 @@ var config = require('./lib/config'),
 program
     .option('--purge-open-orders', 'Cancel ALL open limit orders, and exit (CAUTION)')
     .option('--restore-orders <file>', 'Restore limit orders from the specified backup file, and exit')
+    .option('--sell-order')
+    .option('-c, --coin [value]', 'An optional value')
+    .option('-f, --float <v>', parseFloat)
     .parse(process.argv)
 
 bittrex.options({
@@ -178,3 +181,61 @@ bittrex.getopenorders({}, function(err, data) {
     })
 
 })
+
+if(program.sellOrder && program.float && program.coin){
+      logger.info("--show-coin-orders used");
+      logger.info(' program.float: %j', Math.round(program.float,-4))
+      logger.info(' program.coin: %j', program.coin);
+
+      getBalance(function(d) {
+        console.log(d);
+
+        var tempQty    = d.Available;
+        var tempSell   = program.float;
+        var pair       = 'BTC-'+ program.coin
+        var i          = 1;
+        logger.info("program.float: %j", program.float);
+
+        for(var i = 1; i <= config.numberOfCycles; i++){
+
+            tempQty  = tempQty  - tempQty * config.rake;
+            tempSell = tempSell * config.cycleMultiplier;
+
+            logger.info("Sell %f %j for %f each", roundDown(tempQty, 7) ,program.coin,tempSell);
+            limitSellOrder(pair, roundDown(tempQty,7) ,tempSell, function(d){
+                console.log(d);
+          });
+        }
+      });
+    }
+
+function getBalance(callback){
+  bittrex.getbalance({ currency : program.coin },function(err, data){
+    if (err) {
+      return console.error(err);
+    }
+    callback(data.result);
+  });
+}
+
+function limitSellOrder(mPair,qty, rate, callback){
+     bittrex.tradesell({
+       MarketName: mPair,
+       OrderType: 'LIMIT',
+       Quantity: qty,
+       Rate: rate,
+       TimeInEffect: 'GOOD_TIL_CANCELLED', // supported options are 'IMMEDIATE_OR_CANCEL', 'GOOD_TIL_CANCELLED', 'FILL_OR_KILL'
+       ConditionType: 'NONE', // supported options are 'NONE', 'GREATER_THAN', 'LESS_THAN'
+       Target: 0, // used in conjunction with ConditionType
+     }, function( err, data ) {
+       if(err){
+           return console.log("duhh!, limit order not placed");
+        }
+       callback( data );
+  });
+}
+
+function roundDown(number, decimals) {
+      decimals = decimals || 0;
+      return ( Math.floor( number * Math.pow(10, decimals) ) / Math.pow(10, decimals) );
+}

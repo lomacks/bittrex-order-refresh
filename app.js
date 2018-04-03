@@ -32,7 +32,7 @@ var doCancelOrder = function(uuid, cb) {
     bittrex.cancel({uuid: uuid}, function(err, data) {
         if (err || !data.success) {
             logger.warn('Failed to cancel order %s: %s; %j; skipping...', uuid, data ? data.message : '', err)
-            cb(false)  // continue with next
+            cb(new Error())  // continue with next
             return
         }
 
@@ -45,15 +45,17 @@ var doCancelOrder = function(uuid, cb) {
             if (err || !data.success || !data.result) {
                 logger.warn('Checking order %s failed: %s; %j; will retry...', uuid, data ? data.message : '', err)
                 setTimeout(getOrder, config.retryPeriodMs)
+                cb(new Error())
                 return
             }
             if (data.result.IsOpen) {
                 logger.debug('Cancellation still pending for order %s; will retry...', uuid)
                 setTimeout(getOrder, config.retryPeriodMs)
+                cb(new Error())
                 return
             }
 
-            cb(true)
+            cb()
         }
         setTimeout(getOrder, config.retryPeriodMs)
     })
@@ -73,10 +75,11 @@ var doCreateOrder = function(newOrderType, newOrder, cb) {
         if (err || !data.success) {
             logger.warn('Failed to create replacement %s order, %j: %s; %j; will retry...', newOrderType, newOrder, data ? data.message : '', err)
             setTimeout(createOrder, config.retryPeriodMs)
+            cb(new Error())
             return
         }
 
-        cb(data.result.uuid)
+        cb(null, data.result.uuid)
     }
     setTimeout(createOrder, 0)
 }
@@ -100,8 +103,9 @@ bittrex.getopenorders({}, function(err, data) {
         logger.warn('Cancelling %d open limit orders...', limitOrders.length)
         async.mapLimit(limitOrders, config.concurrentTasks, function (o, cb) {
             var uuid = o.OrderUuid
-            doCancelOrder(uuid, function() {
-                logger.debug('Order %s cancelled.', uuid)
+            doCancelOrder(uuid, function(err) {
+                if (!err)
+                    logger.debug('Order %s cancelled.', uuid)
                 cb()
             })
         })
@@ -118,8 +122,9 @@ bittrex.getopenorders({}, function(err, data) {
             }
 
             logger.debug('Creating %s order: %j', newOrderType, newOrder)
-            doCreateOrder(newOrderType, newOrder, function(newUuid) {
-                logger.debug('Order %s created.', newUuid)
+            doCreateOrder(newOrderType, newOrder, function(err, newUuid) {
+                if (!err)
+                    logger.debug('Order %s created.', newUuid)
                 cb()
             })
         })
@@ -166,14 +171,18 @@ bittrex.getopenorders({}, function(err, data) {
         }
 
         logger.debug('Replacing order %s with new %s order: %j', uuid, newOrderType, newOrder)
-        doCancelOrder(uuid, function(ok) {
-            if (ok) {
+        doCancelOrder(uuid, function(err) {
+            if (!err) {
                 // Order has been cancelled; create the replacement order
-                doCreateOrder(newOrderType, newOrder, function(newUuid) {
-                    logger.debug('Order %s replaced by new order %s.', uuid, newUuid)
+                doCreateOrder(newOrderType, newOrder, function(err, newUuid) {
+                    if (!err)
+                       logger.debug('Order %s replaced by new order %s.', uuid, newUuid)
                     cb()
                 })
-            } // else, skip it this run
+            } else {
+                // else, skip it this run
+                cb()
+            }
         })
     })
 

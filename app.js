@@ -202,12 +202,13 @@ if(program.sellOrder && program.float && program.coin){
             tempSell = tempSell * config.cycleMultiplier;
 
             logger.info("Sell %f %j for %f each", roundDown(tempQty, 7) ,program.coin,tempSell);
-            limitSellOrder(pair, roundDown(tempQty,7) ,tempSell, function(d){
+  	    limitSellOrder(pair, roundDown(tempQty,7) ,tempSell, function(d){
                 console.log(d);
           });
         }
       });
     }
+
 
 function getBalance(callback){
   bittrex.getbalance({ currency : program.coin },function(err, data){
@@ -229,7 +230,12 @@ function limitSellOrder(mPair,qty, rate, callback){
        Target: 0, // used in conjunction with ConditionType
      }, function( err, data ) {
        if(err){
-           return console.log("duhh!, limit order not placed");
+	if(err.message == "MIN_TRADE_REQUIREMENT_NOT_MET") return console.log(err);
+        //try again
+	setTimeout(limitSellOrder(mPair,qty, rate, function(d){
+             console.log(d)
+           }),500);
+           return console.log(err)
         }
        callback( data );
   });

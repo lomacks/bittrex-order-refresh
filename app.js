@@ -187,31 +187,42 @@ if(program.sellOrder && program.float && program.coin){
       logger.info(' program.float: %j', Math.round(program.float,-4))
       logger.info(' program.coin: %j', program.coin);
 
-      getBalance(function(d) {
-        console.log(d);
+      getBalance(program.coin, function(data) {
+          console.log(data);
 
-        var tempQty    = d.Available;
-        var tempSell   = program.float;
-        var pair       = 'BTC-'+ program.coin
-        var i          = 1;
-        logger.info("program.float: %j", program.float);
+          var tempQty    = data.Available;
+          var totQty     = data.Available;
+          var tempSell   = program.float;
+          var pair       = 'BTC-'+ program.coin
+          var i          = 1;
+          logger.info("program.float: %f", program.float);
 
-        for(var i = 1; i <= config.numberOfCycles; i++){
+          var mat = [];
+          for(var i = 1; i <= config.numberOfCycles; i++) mat.push(i);
 
-            tempQty  = tempQty  - tempQty * config.rake;
+
+          async.forEach( Object.keys(mat) , function(callback){
+            tempQty  = totQty * config.rake;
+            totQty   = totQty - tempQty;
             tempSell = tempSell * config.cycleMultiplier;
-
             logger.info("Sell %f %j for %f each", roundDown(tempQty, 7) ,program.coin,tempSell);
-  	    limitSellOrder(pair, roundDown(tempQty,7) ,tempSell, function(d){
-                console.log(d);
+            limitSellOrder(pair, roundDown(tempQty,7) ,tempSell, function(d){
+              console.log(d);
+            });
+
+
+          },function(err) {
+              if(err) throw err
+              console.log("calling callback");
+              callback();
           });
-        }
-      });
+        });
     }
 
 
-function getBalance(callback){
-  bittrex.getbalance({ currency : program.coin },function(err, data){
+
+function getBalance(coin, callback){
+  bittrex.getbalance({ currency : coin },function(err, data){
     if (err) {
       return console.error(err);
     }

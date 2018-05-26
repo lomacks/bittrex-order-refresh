@@ -1,5 +1,5 @@
 {
-  "name": "bittrex-order-ingest",
+  "name": "bittrex-order-refresh",
   "version": "0.1.0",
   "author": "Tom Lomax",
   "private": "true",
@@ -9,12 +9,12 @@
   },
   "_NOTE": "Pin *specific* dependency versions since this is a mission-critical application",
   "dependencies": {
-    "commander": "2.12.1",
+    "commander": "2.15.1",
     "jsonfile": "4.0.0",
-    "lodash": "4.17.4",
-    "moment": "2.19.3",
-    "node-bittrex-api": "0.7.8",
+    "lodash": "4.17.10",
+    "moment": "2.22.1",
+    "node-bittrex-api": "0.8.3",
     "strip-json-comments": "2.0.1",
-    "winston": "2.4.0"
+    "winston": "2.4.2"
   }
 }

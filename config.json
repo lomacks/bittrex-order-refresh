@@ -16,12 +16,19 @@
 
   /* maxOrderAgeDays: Orders older than this many days will be replaced; this should be somewhat lower than Bittrex's
    * maximum order age of 28 days, depending how often you run this script. */
-  "maxOrderAgeDays": 14,
+  "maxOrderAgeDays": 7,
+    
+  /* percentToReplaceEachRun: Of the orders old enough to be replaced, only this many percent will actually be replaced
+   * each time the script is run. The purpose of this is to "stagger" the replacement orders across the month, in order
+   * to avoid situations where some days will require much more work than others, depending on when you originally ran
+   * the script, or if you happened to place a lot of orders one particular day.
+   * To disable this feature, set this to 100 (and probably also increase "maxOrderAgeDays" to something like 14). */
+  "percentToReplaceEachRun": 25,
 
   // retryPeriodMs: Time between retries for failed API calls (milliseconds)
   "retryPeriodMs": 500,
 
-  // replaceAllOrders: Set to true to replace all orders regardless of age (e.g. for testing)
+  // replaceAllOrders: Set to true to replace all orders regardless of age/percentage filter (e.g. for testing)
   "replaceAllOrders": false,
 
   // concurrentTasks: How many API-related "tasks" to run concurrently

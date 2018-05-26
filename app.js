@@ -151,8 +151,13 @@ bittrex.getopenorders({}, function(err, data) {
             var deltaDays = (((deltaMs / 1000) / 60) / 60 ) / 24
             return deltaDays > config.maxOrderAgeDays
         })
-        logger.info('%d limit orders older than %d days will be replaced...',
+        logger.info('%d limit orders older than %d days are old enough to be replaced...',
             staleOrders.length, config.maxOrderAgeDays)
+        
+        var sampleSize = (staleOrders.length * (config.percentToReplaceEachRun / 100)) + 1   // Always do at least 1
+        staleOrders = _.sampleSize(staleOrders, sampleSize)
+        logger.info('Of those, %d%% (%d limit orders) will be replaced this time around...',
+            config.percentToReplaceEachRun, staleOrders.length)
     }
 
     var staleOrderCount = staleOrders.length

@@ -156,7 +156,7 @@ bittrex.getopenorders({}, function(err, data) {
         
         var sampleSize = (staleOrders.length * (config.percentToReplaceEachRun / 100)) + 1   // Always do at least 1
         staleOrders = _.sampleSize(staleOrders, sampleSize)
-        logger.info('Of those, %d%% (%d limit orders) will be replaced this time around...',
+        logger.warn('Of those, %d%% (%d limit orders) will be replaced this time around...',
             config.percentToReplaceEachRun, staleOrders.length)
     }
 

@@ -153,11 +153,12 @@ bittrex.getopenorders({}, function(err, data) {
         })
         logger.info('%d limit orders older than %d days are old enough to be replaced...',
             staleOrders.length, config.maxOrderAgeDays)
-        
-        var sampleSize = (staleOrders.length * (config.percentToReplaceEachRun / 100)) + 1   // Always do at least 1
+
+        // Limit to x% of total open orders each run (not just those up for renewal; for math reasons)
+        var sampleSize = (limitOrders.length * (config.percentToReplaceEachRun / 100)) + 1   // minimum 1
         staleOrders = _.sampleSize(staleOrders, sampleSize)
-        logger.warn('Of those, %d%% (%d limit orders) will be replaced this time around...',
-            config.percentToReplaceEachRun, staleOrders.length)
+        logger.warn('Of those, %d will be replaced this run (work is limited to %d%% of all %d open limit orders each run)...',
+            staleOrders.length, config.percentToReplaceEachRun, limitOrders.length)
     }
 
     var staleOrderCount = staleOrders.length

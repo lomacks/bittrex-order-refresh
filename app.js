@@ -164,7 +164,6 @@ bittrex.getopenorders({}, function(err, data) {
     var staleOrderCount = staleOrders.length
     if (staleOrderCount <= 0) {
         logger.info('Nothing to do.')
-        return
     }
 
     async.mapLimit(staleOrders, config.concurrentTasks, function (o, cb) {
@@ -190,6 +189,9 @@ bittrex.getopenorders({}, function(err, data) {
                 cb()
             }
         })
+    }, function (err, results) {
+        logger.info('For best results run this script at least 1-2 times per week, and review the above log messages in case any issues are reported.')
+        logger.info('Please also check the revision history page at the following link from time to time, and upgrade the script to the latest release if you see that changes have been made:')
+        logger.info('  https://github.com/lomacks/bittrex-order-refresh/commits/master')
     })
-
 })

@@ -1,4 +1,4 @@
-/*jshint node: true, asi: true */
+/*jshint node: true, asi: true, esversion: 6 */
 'use strict'
 
 var config = require('./lib/config'),
